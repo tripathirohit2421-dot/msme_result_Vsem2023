@@ -1,10 +1,159 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MSME Result Portal</title>
   <style>
+    /* 1. Floating Elements Animation (Background Elements) */
+body::before {
+    content: "MSME";
+    position: fixed;
+    top: 20%;
+    left: 10%;
+    font-size: 15vw;
+    font-weight: 900;
+    color: rgba(255,255,255,0.05);
+    z-index: -1;
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(2deg); }
+}
+
+/* 2. Glow Pulse for the Container */
+.container {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 20px rgba(0,0,0,0.1), 0 0 40px rgba(35, 166, 213, 0.2);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.container:hover {
+    transform: translateY(-5px) scale(1.01); /* Halka sa lift aur zoom */
+    box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+}
+
+/* 3. Typing Animation for Header */
+.search-panel h2 {
+    overflow: hidden;
+    border-right: .15em solid var(--msme-orange);
+    white-space: nowrap;
+    margin: 0 auto 25px;
+    letter-spacing: .15em;
+    animation: 
+        typing 3.5s steps(40, end),
+        blink-caret .75s step-end infinite;
+}
+
+@keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: var(--msme-orange); }
+}
+
+/* 4. Ripple Effect on Button Click */
+button.btn-search:active {
+    transform: scale(0.95);
+}
+
+/* 5. Input Field Glow Animation */
+input {
+    transition: all 0.4s ease;
+    background: rgba(255,255,255,0.9);
+}
+
+input:focus {
+    background: #fff;
+    letter-spacing: 1px; /* Typing karte waqt text thoda expand hoga */
+}
+
+/* 6. Success "Wink" Animation (Result load hone par) */
+#resultArea {
+    animation: zoomIn 0.5s ease-out;
+}
+
+@keyframes zoomIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+    /* 1. Page Load Animation */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.container { 
+    animation: fadeInUp 0.8s ease-out; /* Pura box upar uthta hua aayega */
+    max-width: 900px; 
+    margin: 60px auto; 
+    background: rgba(255, 255, 255, 0.95); 
+    border-radius: 15px; 
+    backdrop-filter: blur(10px); /* Glass look */
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2); 
+}
+
+/* 2. Interactive Search Box */
+.search-box { 
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    width: 350px; /* Focus karne par thoda bada hoga */
+    border-color: var(--msme-orange);
+    box-shadow: 0 0 15px rgba(255, 153, 51, 0.2);
+}
+
+/* 3. Pulsing Button Animation */
+button.btn-search { 
+    position: relative;
+    overflow: hidden;
+    transition: 0.4s;
+    z-index: 1;
+}
+
+button.btn-search:hover { 
+    background: var(--msme-orange); 
+    transform: scale(1.05); 
+    box-shadow: 0 5px 15px rgba(255, 153, 51, 0.4);
+}
+
+/* Button ke andar ek chamak (Shine effect) */
+button.btn-search::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 20%;
+    height: 200%;
+    background: rgba(255,255,255,0.3);
+    transform: rotate(30deg);
+    transition: 0s;
+}
+
+button.btn-search:hover::after {
+    left: 120%;
+    transition: 0.6s;
+}
+
+/* 4. Background Animated Gradient */
+body {
+    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+}
+
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
     :root { --main-blue: #003366; --msme-orange: #ff9933; --gov-green: #128112; }
     body { font-family: 'Roboto', Arial, sans-serif; background-color: #f4f7f9; margin: 0; padding: 0; color: #333; }
     
