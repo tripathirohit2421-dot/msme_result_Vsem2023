@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MSME Result Portal</title>
+  <style>
+    :root { --main-blue: #003366; --msme-orange: #ff9933; --gov-green: #128112; }
+    body { font-family: 'Roboto', Arial, sans-serif; background-color: #f4f7f9; margin: 0; padding: 0; color: #333; }
+    
+    /* Top Bar */
+    .top-strip { background: linear-gradient(to right, #ff9933, #ffffff, #128112); height: 5px; width: 100%; }
+    
+    /* Header Section */
+    .header { background: white; padding: 15px 5%; display: flex; align-items: center; border-bottom: 2px solid var(--main-blue); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .header-text { margin-left: 15px; }
+    .header-text h1 { margin: 0; font-size: 18px; color: var(--main-blue); letter-spacing: 0.5px; }
+    .header-text p { margin: 2px 0; font-size: 12px; font-weight: bold; color: #555; }
+
+    .container { max-width: 900px; margin: 30px auto; background: white; border-radius: 4px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); border: 1px solid #ddd; }
+    
+    /* Search Section */
+    .search-panel { background: #f9f9f9; padding: 25px; text-align: center; border-bottom: 1px solid #eee; }
+    .search-panel h2 { font-size: 20px; margin-bottom: 15px; color: var(--main-blue); }
+    .search-box { display: flex; justify-content: center; gap: 0; }
+    input { padding: 12px; width: 300px; border: 1px solid #ccc; border-right: none; font-size: 15px; outline: none; }
+    button.btn-search { padding: 12px 25px; background: var(--main-blue); color: white; border: 1px solid var(--main-blue); cursor: pointer; font-weight: bold; transition: 0.3s; }
+    button.btn-search:hover { background: #002244; }
+    button.btn-search:disabled { background: #ccc; cursor: not-allowed; }
+
+    /* Result Content */
+    #resultArea { padding: 40px; display: none; position: relative; }
+    .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 80px; color: rgba(0,0,0,0.03); font-weight: bold; pointer-events: none; z-index: 0; }
+    
+    .marksheet-header { text-align: center; margin-bottom: 30px; border-bottom: 2px double #eee; padding-bottom: 15px; }
+    .marksheet-header h3 { margin: 0; color: #333; text-decoration: underline; }
+
+    /* Student Profile Table */
+    .info-table { width: 100%; margin-bottom: 25px; z-index: 1; position: relative; }
+    .info-table td { padding: 10px; border: none; font-size: 14px; }
+    .label { font-weight: bold; color: #555; width: 160px; text-transform: uppercase; font-size: 12px; }
+    .val { color: #000; font-weight: 500; border-bottom: 1px dotted #ccc; }
+
+    /* Score Table */
+    .score-table { width: 100%; border-collapse: collapse; margin-top: 10px; z-index: 1; position: relative; }
+    .score-table th { background: #eee; color: #333; border: 1px solid #ccc; padding: 12px; text-align: left; font-size: 13px; text-transform: uppercase; }
+    .score-table td { border: 1px solid #ccc; padding: 12px; font-size: 14px; }
+    .row-total { background: #f9f9f9; font-weight: bold; }
+
+    /* Result Summary */
+    .summary { margin-top: 30px; display: flex; justify-content: space-between; align-items: flex-start; }
+    .percentage-section { font-size: 16px; line-height: 1.8; }
+    .grade-stamp { border: 3px solid var(--gov-green); color: var(--gov-green); padding: 10px 30px; font-size: 24px; font-weight: bold; border-radius: 8px; transform: rotate(-5deg); }
+
+    /* Print Footer */
+    .print-footer { margin-top: 50px; text-align: right; display: none; }
+    .signature { display: inline-block; text-align: center; }
+    .sign-line { border-top: 1px solid #000; width: 200px; margin-top: 50px; }
+
+    .action-bar { padding: 20px; background: #eee; text-align: center; }
+    .btn-print { background: #666; color: white; padding: 10px 20px; border: none; border-radius: 3px; cursor: pointer; font-size: 14px; }
+
+    @media print {
+      body { background: white; }
+      .top-strip, .header, .search-panel, .action-bar { display: none; }
+      .container { box-shadow: none; border: none; width: 100%; max-width: 100%; }
+      #resultArea { display: block !important; padding: 0; }
+      .print-footer { display: block; }
+      .grade-stamp { -webkit-print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-strip"></div>
+  
+  <div class="header">
+    <img src="msme_tech_logo.jpg" alt="MSME Logo" height="60">
+    <div class="header-text">
+      <h1>MSME TECHNOLOGY CENTRE, BHIWADI</h1>
+      <p>Ministry of Micro, Small & Medium Enterprises, Govt. of India</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="search-panel">
+      <h2>Examination Results 2025-26</h2>
+      <div class="search-box">
+        <input type="text" id="rollInput" placeholder="Enter Your Roll Number...">
+        <button class="btn-search" id="searchBtn" onclick="fetchResult()">GET RESULT</button>
+      </div>
+    </div>
+
+    <div id="resultArea">
+      <div class="watermark">MSME TC BHIWADI</div>
+      
+      <div class="marksheet-header">
+        <h3>ACADEMIC PERFORMANCE REPORT</h3>
+      </div>
+      
+      <table class="info-table">
+        <tr>
+          <td class="label">Name of Student</td><td class="val" id="dispName"></td>
+          <td class="label">Roll Number</td><td class="val" id="dispRoll"></td>
+        </tr>
+        <tr>
+          <td class="label">Father's Name</td><td class="val" id="dispFather"></td>
+          <td class="label">Semester / Year</td><td class="val" id="dispSem"></td>
+        </tr>
+        <tr>
+          <td class="label">Batch / Session</td><td class="val" id="dispBatch"></td>
+          <td class="label">Institute Code</td><td class="val">MSME-BHW-02</td>
+        </tr>
+      </table>
+
+      <table class="score-table">
+        <thead>
+          <tr>
+            <th>Subject Name</th>
+            <th style="width: 100px;">Maximum</th>
+            <th style="width: 100px;">Obtained</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>M5-01: CNC PROGRAMMING & MACHINING(THEORY)</td><td>60</td><td id="s1"></td></tr>
+          <tr><td>M5-01: CNC PROGRAMMING & MACHINING(PRACTICES)</td><td>60</td><td id="s2"></td></tr>
+          <tr><td>M5-02 INDUSTRIAL HYDRAULICS & PNEUMATIC(THEORY)</td><td>60</td><td id="s3"></td></tr>
+          <tr><td>M5-02 INDUSTRIAL HYDRAULICS & PNEUMATIC(PRACTICES)</td><td>60</td><td id="s4"></td></tr>
+          <tr><td>M5–03: THEORY OF MACHINE</td><td>60</td><td id="s5"></td></tr>
+          <tr><td>M5-04: PLC PROGRAMMING(THEORY)</td><td>60</td><td id="s6"></td></tr>
+          <tr><td>M5-04: PLC PROGRAMMING(PRACTICES)</td><td>60</td><td id="s7"></td></tr>
+          <tr><td>M5–05: ADVANCE MANUFACTURING PRACTICES</td><td>60</td><td id="s8"></td></tr>
+          <tr><td>M5-06: ELECTRICAL DRIVES AND CONTROL(THEORY)</td><td>60</td><td id="s9"></td></tr>
+          <tr><td>M5-06: ELECTRICAL DRIVES AND CONTROL(PRACTICES)</td><td>60</td><td id="s10"></td></tr>
+          <tr class="row-total">
+            <td>TOTAL AGGREGATE</td>
+            <td id="dispOutOf"></td>
+            <td id="dispTotal"></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="summary">
+        <div class="percentage-section">
+          <b>PERCENTAGE:</b> <span id="dispPer"></span><br>
+          <b>RESULT STATUS:</b> <span id="dispStatus" style="font-weight: bold;">PASS</span><br>
+          <small>Date of Issue: 12-Feb-2026</small>
+        </div>
+        <div class="grade-stamp" id="dispGrade"></div>
+      </div>
+
+      <div class="print-footer">
+        <div class="signature">
+          <div class="sign-line"></div>
+          <p>Controller of Examinations<br>MSME TC Bhiwadi</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-bar" id="actionBar" style="display: none;">
+      <button class="btn-print" onclick="window.print()">Download / Print Result</button>
+    </div>
+  </div>
+
+  <script>
+    // 1. APNA GOOGLE WEB APP URL YAHAN PASTE KAREIN
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9YQpynd7008SwQcbaEWyvNKwattAnWvi7K1NgGW7ybF3iWpGCAsIR3lRNbvCHMByp/exec";
+
+    async function fetchResult() {
+      const rollInput = document.getElementById('rollInput');
+      const btn = document.getElementById('searchBtn');
+      const roll = rollInput.value.trim();
+
+      if(!roll) return alert("Please enter Roll Number");
+      
+      // UI Update
+      btn.innerText = "Searching...";
+      btn.disabled = true;
+
+      try {
+        // Fetch data from Google Script (External Call)
+        const response = await fetch(`${SCRIPT_URL}?roll=${roll}`);
+        const data = await response.json();
+
+        if(!data || data.error) {
+          alert("Roll Number not found in our records.");
+          document.getElementById('resultArea').style.display = 'none';
+          document.getElementById('actionBar').style.display = 'none';
+        } else {
+          renderResult(data);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        alert("Server error! Make sure your Web App URL is correct and deployed as 'Anyone'.");
+      } finally {
+        btn.innerText = "GET RESULT";
+        btn.disabled = false;
+      }
+    }
+
+    function renderResult(data) {
+      document.getElementById('resultArea').style.display = 'block';
+      document.getElementById('actionBar').style.display = 'block';
+      
+      // Basic Info
+      document.getElementById('dispName').innerText = data.name || "N/A";
+      document.getElementById('dispFather').innerText = data.father || "N/A";
+      document.getElementById('dispRoll').innerText = data.rollNo || "N/A";
+      document.getElementById('dispSem').innerText = data.semester || "N/A";
+      document.getElementById('dispBatch').innerText = data.batch || "N/A";
+      
+      // Marks Mapping
+      if(data.marks) {
+        for(let i=1; i<=10; i++) {
+          document.getElementById('s' + i).innerText = data.marks['s' + i] || "0";
+        }
+      }
+      
+      document.getElementById('dispTotal').innerText = data.total || "0";
+      document.getElementById('dispOutOf').innerText = data.outOf || "600";
+      
+      // Percentage Logic
+      let p = parseFloat(data.percentage);
+      if(!isNaN(p)) {
+        document.getElementById('dispPer').innerText = (p < 1 ? (p * 100).toFixed(2) : p.toFixed(2)) + "%";
+      } else {
+        document.getElementById('dispPer').innerText = "0%";
+      }
+      
+      document.getElementById('dispGrade').innerText = data.grade || "N/A";
+
+      // Status Color Logic
+      const statusEl = document.getElementById('dispStatus');
+      const grade = (data.grade || "").toUpperCase();
+      if(grade === "F" || grade === "FAIL") {
+          statusEl.innerText = "FAIL";
+          statusEl.style.color = "red";
+      } else {
+          statusEl.innerText = "PASS";
+          statusEl.style.color = "green";
+      }
+      
+      window.scrollTo({ top: 400, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
